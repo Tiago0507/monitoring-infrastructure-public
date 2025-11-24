@@ -57,7 +57,7 @@
 
 - name: Copy dashboards
   copy:
-    src: "{{ playbook_dir }}/../dashboards/"
+    src: "{{ playbook_dir }}/dashboards/"
     dest: "{{ grafana_data_dir }}/dashboards/"
     owner: grafana
     group: grafana

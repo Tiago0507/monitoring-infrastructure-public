@@ -1,19 +1,31 @@
 ---
-- name: Download postfix_exporter
-  get_url:
-    url: "https://github.com/kumina/postfix_exporter/releases/download/{{ postfix_exporter_version }}/postfix_exporter-{{ postfix_exporter_version }}.linux-amd64.tar.gz"
-    dest: /tmp/postfix_exporter.tar.gz
-    mode: '0644'
+- name: Install dependencies for building postfix_exporter
+  apt:
+    name:
+      - golang-go
+      - libsystemd-dev
+      - pkg-config
+    state: present
+    update_cache: yes
 
-- name: Extract postfix_exporter
-  unarchive:
-    src: /tmp/postfix_exporter.tar.gz
-    dest: /tmp
-    remote_src: yes
+- name: Clone postfix_exporter repository
+  git:
+    repo: 'https://github.com/kumina/postfix_exporter.git'
+    dest: /tmp/postfix_exporter_src
+    version: master
+    force: yes
+
+- name: Build postfix_exporter
+  shell: |
+    cd /tmp/postfix_exporter_src
+    rm -f go.mod go.sum postfix_exporter
+    go mod init github.com/kumina/postfix_exporter
+    go mod tidy
+    go build -o postfix_exporter
 
 - name: Copy postfix_exporter binary
   copy:
-    src: "/tmp/postfix_exporter-{{ postfix_exporter_version }}.linux-amd64/postfix_exporter"
+    src: /tmp/postfix_exporter_src/postfix_exporter
     dest: /usr/local/bin/postfix_exporter
     mode: '0755'
     remote_src: yes

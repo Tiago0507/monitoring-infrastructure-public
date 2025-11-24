@@ -1,0 +1,45 @@
+---
+- name: Debug BIND configuration
+  hosts: dns-primary
+  become: yes
+  tasks:
+    - name: Show current config
+      shell: cat /etc/bind/named.conf.options
+      register: current_config
+
+    - name: Display current config
+      debug:
+        msg: "{{ current_config.stdout_lines }}"
+
+    - name: Backup config
+      copy:
+        src: /etc/bind/named.conf.options
+        dest: /tmp/named.conf.options.test
+        remote_src: yes
+
+    - name: Insert statistics line
+      lineinfile:
+        path: /tmp/named.conf.options.test
+        line: '    statistics-channels { inet 127.0.0.1 port 8053 allow { 127.0.0.1; }; };'
+        insertbefore: '^};$'
+        state: present
+
+    - name: Show modified config
+      shell: cat /tmp/named.conf.options.test
+      register: modified_config
+
+    - name: Display modified config
+      debug:
+        msg: "{{ modified_config.stdout_lines }}"
+
+    - name: Test validation on modified config
+      shell: named-checkconf /tmp/named.conf.options.test 2>&1
+      register: validation_output
+      failed_when: false
+
+    - name: Display validation result
+      debug:
+        msg:
+          - "Return code: {{ validation_output.rc }}"
+          - "Output: {{ validation_output.stdout }}"
+          - "Error: {{ validation_output.stderr }}"

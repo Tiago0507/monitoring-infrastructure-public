@@ -1,0 +1,33 @@
+---
+- name: Fix broken DNS servers
+  hosts: dns_servers
+  become: yes
+  tasks:
+    - name: Remove broken statistics-channels lines
+      lineinfile:
+        path: /etc/bind/named.conf.options
+        regexp: '.*statistics-channels.*'
+        state: absent
+
+    - name: Remove Ansible managed block markers
+      lineinfile:
+        path: /etc/bind/named.conf.options
+        regexp: '.*ANSIBLE MANAGED.*'
+        state: absent
+
+    - name: Validate BIND configuration
+      command: named-checkconf
+      register: bind_check
+      changed_when: false
+      failed_when: false
+
+    - name: Restart BIND if config is valid
+      systemd:
+        name: named
+        state: restarted
+      when: bind_check.rc == 0
+
+    - name: Show error if config still invalid
+      debug:
+        msg: "BIND config still invalid. Manual intervention required."
+      when: bind_check.rc != 0

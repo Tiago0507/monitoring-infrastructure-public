@@ -10,13 +10,15 @@
     repo: 'https://github.com/kumina/dovecot_exporter.git'
     dest: /tmp/dovecot_exporter
     version: master
+    force: yes
 
 - name: Build dovecot_exporter
   shell: |
     cd /tmp/dovecot_exporter
+    rm -f go.mod go.sum dovecot_exporter
+    go mod init github.com/kumina/dovecot_exporter
+    go mod tidy
     go build -o dovecot_exporter .
-  args:
-    creates: /tmp/dovecot_exporter/dovecot_exporter
 
 - name: Copy dovecot_exporter binary
   copy:

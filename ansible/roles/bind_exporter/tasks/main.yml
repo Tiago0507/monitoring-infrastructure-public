@@ -1,12 +1,56 @@
 ---
-- name: Enable BIND statistics
+- name: Check if BIND statistics already enabled
+  shell: grep -q "statistics-channels" /etc/bind/named.conf.options
+  register: stats_check
+  failed_when: false
+  changed_when: false
+
+- name: Backup BIND config
+  copy:
+    src: /etc/bind/named.conf.options
+    dest: /etc/bind/named.conf.options.backup
+    remote_src: yes
+  when: stats_check.rc != 0
+
+- name: Enable BIND statistics (insert after options block)
   lineinfile:
     path: /etc/bind/named.conf.options
-    line: '    statistics-channels { inet 127.0.0.1 port 8053 allow { 127.0.0.1; }; };'
-    insertbefore: '};'
+    line: 'statistics-channels { inet 127.0.0.1 port 8053 allow { 127.0.0.1; }; };'
+    insertafter: EOF
     state: present
-  notify:
-    - restart bind9
+  when: stats_check.rc != 0
+  register: bind_config_changed
+
+- name: Validate BIND configuration
+  command: named-checkconf
+  register: bind_validation
+  failed_when: false
+  changed_when: false
+  when: bind_config_changed is changed
+
+- name: Restore backup if validation failed
+  copy:
+    src: /etc/bind/named.conf.options.backup
+    dest: /etc/bind/named.conf.options
+    remote_src: yes
+  when:
+    - bind_config_changed is changed
+    - bind_validation.rc != 0
+
+- name: Fail if BIND config is invalid
+  fail:
+    msg: "BIND configuration validation failed. Config restored from backup."
+  when:
+    - bind_config_changed is changed
+    - bind_validation.rc != 0
+
+- name: Trigger BIND restart if config changed and valid
+  debug:
+    msg: "BIND configuration updated successfully"
+  when:
+    - bind_config_changed is changed
+    - bind_validation.rc == 0
+  notify: restart bind9
 
 - name: Download bind_exporter
   get_url:
