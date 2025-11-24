@@ -1,0 +1,79 @@
+{
+  "dashboard": {
+    "title": "Email Server Monitoring",
+    "tags": ["email", "postfix", "dovecot"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Postfix Message Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(postfix_up[5m])",
+            "legendFormat": "Messages Sent"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Mail Queue Size",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "postfix_queue_length",
+            "legendFormat": "Queue Size"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Dovecot Active Connections",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "dovecot_up",
+            "legendFormat": "IMAP/POP3 Active"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "Email Services Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"email-server\"}",
+            "legendFormat": "{{instance}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      }
+    ],
+    "schemaVersion": 16,
+    "version": 0
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "dashboard": {
+    "title": "NTP Server Monitoring",
+    "tags": ["ntp", "chrony"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Time Offset",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "chrony_tracking_last_offset_seconds",
+            "legendFormat": "Offset (seconds)"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "NTP Sources",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "chrony_sources_online",
+            "legendFormat": "Online Sources"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Stratum Level",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "chrony_tracking_stratum",
+            "legendFormat": "Stratum"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "NTP Server Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"ntp-server\"}",
+            "legendFormat": "Status"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      }
+    ],
+    "schemaVersion": 16,
+    "version": 0
+  }
+}

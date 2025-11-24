@@ -1,0 +1,70 @@
+---
+- name: Install dependencies
+  apt:
+    name:
+      - apt-transport-https
+      - software-properties-common
+      - wget
+    state: present
+    update_cache: yes
+
+- name: Add Grafana GPG key
+  apt_key:
+    url: https://apt.grafana.com/gpg.key
+    state: present
+
+- name: Add Grafana repository
+  apt_repository:
+    repo: deb https://apt.grafana.com stable main
+    state: present
+    filename: grafana
+
+- name: Install Grafana
+  apt:
+    name: grafana
+    state: present
+    update_cache: yes
+
+- name: Create Grafana directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: grafana
+    group: grafana
+    mode: '0755'
+  loop:
+    - "{{ grafana_config_dir }}/provisioning/datasources"
+    - "{{ grafana_config_dir }}/provisioning/dashboards"
+    - "{{ grafana_data_dir }}/dashboards"
+
+- name: Configure Grafana datasource
+  template:
+    src: datasource.yml.j2
+    dest: "{{ grafana_config_dir }}/provisioning/datasources/prometheus.yml"
+    owner: grafana
+    group: grafana
+    mode: '0644'
+  notify: restart grafana
+
+- name: Configure Grafana dashboard provider
+  template:
+    src: dashboard-provider.yml.j2
+    dest: "{{ grafana_config_dir }}/provisioning/dashboards/default.yml"
+    owner: grafana
+    group: grafana
+    mode: '0644'
+  notify: restart grafana
+
+- name: Copy dashboards
+  copy:
+    src: "{{ playbook_dir }}/../dashboards/"
+    dest: "{{ grafana_data_dir }}/dashboards/"
+    owner: grafana
+    group: grafana
+    mode: '0644'
+
+- name: Enable and start Grafana
+  systemd:
+    name: grafana-server
+    enabled: yes
+    state: started

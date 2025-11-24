@@ -1,0 +1,8 @@
+---
+- name: Deploy Prometheus and Grafana
+  hosts: monitoring
+  become: yes
+  roles:
+    - prometheus
+    - grafana
+    - node_exporter

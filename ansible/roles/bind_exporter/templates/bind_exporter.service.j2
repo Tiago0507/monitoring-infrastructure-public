@@ -1,0 +1,12 @@
+[Unit]
+Description=BIND Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=root
+Type=simple
+ExecStart=/usr/local/bin/bind_exporter --bind.stats-url={{ bind_stats_url }} --web.listen-address=:{{ bind_exporter_port }}
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,42 @@
+---
+- name: Enable BIND statistics
+  lineinfile:
+    path: /etc/bind/named.conf.options
+    line: '    statistics-channels { inet 127.0.0.1 port 8053 allow { 127.0.0.1; }; };'
+    insertbefore: '};'
+    state: present
+  notify:
+    - restart bind9
+
+- name: Download bind_exporter
+  get_url:
+    url: "https://github.com/prometheus-community/bind_exporter/releases/download/v{{ bind_exporter_version }}/bind_exporter-{{ bind_exporter_version }}.linux-amd64.tar.gz"
+    dest: /tmp/bind_exporter.tar.gz
+    mode: '0644'
+
+- name: Extract bind_exporter
+  unarchive:
+    src: /tmp/bind_exporter.tar.gz
+    dest: /tmp
+    remote_src: yes
+
+- name: Copy bind_exporter binary
+  copy:
+    src: "/tmp/bind_exporter-{{ bind_exporter_version }}.linux-amd64/bind_exporter"
+    dest: /usr/local/bin/bind_exporter
+    mode: '0755'
+    remote_src: yes
+
+- name: Create bind_exporter systemd service
+  template:
+    src: bind_exporter.service.j2
+    dest: /etc/systemd/system/bind_exporter.service
+    mode: '0644'
+  notify: restart bind_exporter
+
+- name: Enable and start bind_exporter
+  systemd:
+    name: bind_exporter
+    enabled: yes
+    state: started
+    daemon_reload: yes

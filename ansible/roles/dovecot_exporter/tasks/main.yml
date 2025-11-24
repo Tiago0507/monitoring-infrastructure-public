@@ -1,0 +1,40 @@
+---
+- name: Install Go (required for building dovecot_exporter)
+  apt:
+    name: golang-go
+    state: present
+    update_cache: yes
+
+- name: Clone dovecot_exporter repository
+  git:
+    repo: 'https://github.com/kumina/dovecot_exporter.git'
+    dest: /tmp/dovecot_exporter
+    version: master
+
+- name: Build dovecot_exporter
+  shell: |
+    cd /tmp/dovecot_exporter
+    go build -o dovecot_exporter .
+  args:
+    creates: /tmp/dovecot_exporter/dovecot_exporter
+
+- name: Copy dovecot_exporter binary
+  copy:
+    src: /tmp/dovecot_exporter/dovecot_exporter
+    dest: /usr/local/bin/dovecot_exporter
+    mode: '0755'
+    remote_src: yes
+
+- name: Create dovecot_exporter systemd service
+  template:
+    src: dovecot_exporter.service.j2
+    dest: /etc/systemd/system/dovecot_exporter.service
+    mode: '0644'
+  notify: restart dovecot_exporter
+
+- name: Enable and start dovecot_exporter
+  systemd:
+    name: dovecot_exporter
+    enabled: yes
+    state: started
+    daemon_reload: yes

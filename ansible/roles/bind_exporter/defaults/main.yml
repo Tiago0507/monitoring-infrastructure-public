@@ -1,0 +1,4 @@
+---
+bind_exporter_version: "0.7.0"
+bind_exporter_port: 9119
+bind_stats_url: "http://localhost:8053/"

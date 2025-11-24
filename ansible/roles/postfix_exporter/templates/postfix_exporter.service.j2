@@ -1,0 +1,12 @@
+[Unit]
+Description=Postfix Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=root
+Type=simple
+ExecStart=/usr/local/bin/postfix_exporter --web.listen-address=:{{ postfix_exporter_port }} --postfix.showq_path=/usr/sbin/postqueue
+
+[Install]
+WantedBy=multi-user.target

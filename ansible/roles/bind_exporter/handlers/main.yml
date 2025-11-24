@@ -1,0 +1,11 @@
+---
+- name: restart bind9
+  systemd:
+    name: named
+    state: restarted
+
+- name: restart bind_exporter
+  systemd:
+    name: bind_exporter
+    state: restarted
+    daemon_reload: yes

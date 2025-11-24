@@ -1,0 +1,28 @@
+---
+- name: Deploy exporters to DNS servers
+  hosts: dns_servers
+  become: yes
+  roles:
+    - node_exporter
+    - bind_exporter
+
+- name: Deploy exporters to Email server
+  hosts: email_servers
+  become: yes
+  roles:
+    - node_exporter
+    - postfix_exporter
+    - dovecot_exporter
+
+- name: Deploy exporters to NTP server
+  hosts: ntp_servers
+  become: yes
+  roles:
+    - node_exporter
+    - chrony_exporter
+
+- name: Deploy exporters to DHCP server
+  hosts: dhcp_servers
+  become: yes
+  roles:
+    - node_exporter

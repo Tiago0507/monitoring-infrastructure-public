@@ -1,0 +1,83 @@
+{
+  "dashboard": {
+    "title": "DNS Servers Monitoring",
+    "tags": ["dns", "bind"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "DNS Queries Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(bind_query_recursions_total[5m])",
+            "legendFormat": "{{instance}} - Recursive Queries"
+          },
+          {
+            "expr": "rate(bind_responses_total[5m])",
+            "legendFormat": "{{instance}} - Responses"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "DNS Query Types",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(bind_query_type_total[5m])",
+            "legendFormat": "{{type}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "DNS Server Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"dns-servers\"}",
+            "legendFormat": "{{instance}}"
+          }
+        ],
+        "gridPos": {
+          "h": 4,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "Cache Hit Ratio",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "rate(bind_resolver_cache_hits_total[5m]) / (rate(bind_resolver_cache_hits_total[5m]) + rate(bind_resolver_cache_misses_total[5m])) * 100",
+            "legendFormat": "{{instance}}"
+          }
+        ],
+        "gridPos": {
+          "h": 4,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      }
+    ],
+    "schemaVersion": 16,
+    "version": 0
+  }
+}
